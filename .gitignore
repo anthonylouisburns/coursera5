@@ -1,0 +1,7 @@
+.idea/
+target/
+*/target/
+
+/capstone-ui/target/
+/project/project/
+/project/target/
