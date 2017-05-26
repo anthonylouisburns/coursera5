@@ -1,5 +1,6 @@
 package observatory
 
+import com.sksamuel.scrimage
 import com.sksamuel.scrimage.{Image, Pixel}
 
 /**
@@ -40,6 +41,7 @@ object Visualization {
   def weight(dist:Double):Double={
     1/(Math.pow(dist,p))
   }
+
   def distance(one: Location, two: Location):Double={
     val delta_lon = one.lonRad - two.lonRad
     val cos_lon = Math.cos(delta_lon)
@@ -57,16 +59,63 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Double, Color)], value: Double): Color = {
-    ???
+    val ba= before_after(points, value)
+    if(ba._2._1 - ba._1._1 == 0) return ba._1._2
+    val bweight = (value - ba._1._1)/(ba._2._1 - ba._1._1)
+    val aweight = 1-bweight
+    val bcolor = ba._1._2
+    val acolor = ba._2._2
+    Color(((bcolor.red*bweight)+(acolor.red*aweight)).toInt,
+      ((bcolor.green*bweight)+(acolor.green*aweight)).toInt,
+      ((bcolor.blue*bweight)+(acolor.blue*aweight)).toInt)
+  }
+
+
+  def before_after(points: Iterable[(Double, Color)], value: Double): ((Double, Color),(Double, Color))={
+    (before(points.head, points.tail,value),after(points.head, points.tail,value))
+  }
+
+  def after(a:(Double, Color), points: Iterable[(Double, Color)], value: Double): (Double, Color) = points match{
+    case Nil => a
+    case h::t => {
+      if(a._1 > value) {
+        if (h._1 < a._1 && h._1 > value) after(h, t, value)
+        else after(a, t, value)
+      }else{
+        if (h._1 > a._1) after(h, t, value)
+        else after(a, t, value)
+      }
+    }
+  }
+
+  def before(a:(Double, Color), points: Iterable[(Double, Color)], value: Double): (Double, Color) = points match{
+    case Nil => a
+    case h::t => {
+      if(a._1 < value) {
+        if (h._1 > a._1 && h._1 < value) after(h, t, value)
+        else after(a, t, value)
+      }else{
+        if (h._1 < a._1) after(h, t, value)
+        else after(a, t, value)
+      }
+    }
   }
 
   /**
-    * @param temperatures Known temperatures
+alpha    * @param temperatures Known temperatures
     * @param colors Color scale
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
-    ???
+    val p = Pixel(0,0,0,0)
+    val points = for (
+      x <- -180 to 180;
+      y <- -90 to 90
+    ) yield (x, y)
+    val alltemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
+    val allColors = alltemps.map(x=>interpolateColor(colors, x))
+    val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
+    Image(361,181,allPixels.toArray)
   }
 
 }
