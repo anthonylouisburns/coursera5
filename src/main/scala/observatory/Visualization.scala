@@ -2,11 +2,15 @@ package observatory
 
 import com.sksamuel.scrimage
 import com.sksamuel.scrimage.{Image, Pixel}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * 2nd milestone: basic visualization
   */
 object Visualization {
+  @transient lazy val conf: SparkConf = new SparkConf().setMaster("local").setAppName("GlobalWarming")
+  @transient lazy val sc: SparkContext = new SparkContext(conf)
   val p = 2
   val r_km =  6378.14 // 6356.752
   /**
@@ -14,18 +18,23 @@ object Visualization {
     * @param location Location where to predict the temperature
     * @return The predicted temperature at `location`
     */
+  //use RDD
   def predictTemperature(temperatures: Iterable[(Location, Double)], location: Location): Double = {
+    val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
     distWeighted(distancesAndTemps(temperatures, location))
   }
 
+  //use RDD
   def distancesAndTemps(temperatures: Iterable[(Location, Double)], location: Location): Iterable[(Double, Double)] = {
     temperatures.map(e=>(distance(e._1, location), e._2))
   }
 
+  //use RDD
   def distWeighted(distTemps: Iterable[(Double, Double)]):Double={
     distTemps.map(e=>e._2*weight(e._1)).sum / distTemps.map(e=>weight(e._1)).sum
   }
 
+  //use RDD
   def distWeighted(top:Double, bottom:Double, distTemps: List[(Double, Double)]):Double=distTemps match {
     case Nil => top / bottom
     case h::t => {
@@ -106,7 +115,10 @@ alpha    * @param temperatures Known temperatures
     * @param colors Color scale
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
+  //use RDD
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
+    val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
+
     val p = Pixel(0,0,0,0)
     val points = for (
       x <- -90 to 90;
