@@ -59,7 +59,7 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Double, Color)], value: Double): Color = {
-    val ba= before_after(points, value)
+    val ba = before_after(points, value)
     if(ba._2._1 - ba._1._1 == 0) return ba._1._2
     val bweight = (value - ba._1._1)/(ba._2._1 - ba._1._1)
     val aweight = 1-bweight
@@ -92,11 +92,11 @@ object Visualization {
     case Nil => a
     case h::t => {
       if(a._1 < value) {
-        if (h._1 > a._1 && h._1 < value) after(h, t, value)
-        else after(a, t, value)
+        if (h._1 > a._1 && h._1 < value) before(h, t, value)
+        else before(a, t, value)
       }else{
-        if (h._1 < a._1) after(h, t, value)
-        else after(a, t, value)
+        if (h._1 < a._1) before(h, t, value)
+        else before(a, t, value)
       }
     }
   }
@@ -109,14 +109,13 @@ alpha    * @param temperatures Known temperatures
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
     val p = Pixel(0,0,0,0)
     val points = for (
-      x <- -180 to 180;
-      y <- -90 to 90
+      x <- -90 to 90;
+      y <- -180 to 180
     ) yield (x, y)
-    val alltemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
-    val allColors = alltemps.map(x=>interpolateColor(colors, x))
+    val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
+    val allColors = allTemps.map(x=>interpolateColor(colors, x))
     val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
     Image(361,181,allPixels.toArray)
   }
-
 }
 
