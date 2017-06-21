@@ -6,8 +6,9 @@ import com.sksamuel.scrimage.{Image, Pixel}
 object VizTest2 extends App {
 
   override def main(args: Array[String]) = {
-    out(viz)
-//    t()
+//    out(viz)
+//    t3()
+    t()
   }
 
 
@@ -30,6 +31,10 @@ object VizTest2 extends App {
     out(img)
   }
 
+  def test(): Unit = {
+    val img = Visualization.visualize(temps, colors)
+  }
+
   def out(img:Image): Unit ={
     img.output("/Users/aburns/src/anthony/coursera/scalaSpecialization/coursera5/observatory/some-image.png")
   }
@@ -39,6 +44,11 @@ object VizTest2 extends App {
   }
 
   def t3(): Unit ={
+    val l = Visualization.predictTemperature(temps, Location(-89,-180))
+    println(l)
+  }
+
+  def predictTemperature(): Unit ={
     val l = Visualization.predictTemperature(temps, Location(-89,-180))
     println(l)
   }
