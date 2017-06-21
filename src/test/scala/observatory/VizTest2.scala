@@ -7,12 +7,28 @@ object VizTest2 extends App {
 
   override def main(args: Array[String]) = {
 //    out(viz)
-//    t3()
-    color_check()
+    t()
+//    color_check()
 //    t_old()
     //Color(191,0,64) (scale = List((0.0,Color(255,0,0)), (1.0,Color(0,0,255))), value = 0.25)
+//    dist()
+//    pt()
   }
 
+  def ptOld(){
+    val v =VisualizationOld.predictTemperature(temps, Location(-90.0,-180.0))
+    println(v)
+  }
+
+  def pt(){
+    val v =Visualization.predictTemperature(temps, Location(-90.0,-180.0))
+    println(v)
+  }
+
+  def dist(): Unit ={
+    println(Visualization.distance(Location(-90.0,-180.0),(Location(89.0,0.0))))
+    println(VisualizationOld.distance(Location(-90.0,-180.0),(Location(89.0,0.0))))
+  }
   def color_check(): Unit ={
     //Incorrect predicted color: Color(127,0,127). Expected: Color(128,0,128) (scale = List((0.0,Color(255,0,0)), (2.147483647E9,Color(0,0,255))), value = 1.0737418235E9)
     val c = List((0.0,Color(255,0,0)), (2.147483647E9,Color(0,0,255)))
@@ -20,6 +36,7 @@ object VizTest2 extends App {
     val out = Visualization.interpolateColor(c,x)
     println(out)//Color(191,0,64)
   }
+//((Location(-90.0,-180.0),(19926.198224414067,0.0)), (Location(-90.0,-180.0),(111.31954315314003,-15.0))
 
   def colors(): Iterable[(Double, Color)] = {
     val white = Color(255, 255, 255)

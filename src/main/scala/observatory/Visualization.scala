@@ -155,6 +155,11 @@ alpha    * @param temperatures Known temperatures
     Image(361,181,allPixels.toArray)
   }
 
+  def preview[T](s:String, v:RDD[T]): Unit ={
+    println(s+":"+v.take(10).toList)
+    println()
+
+  }
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image =  {
     val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
 
@@ -164,13 +169,30 @@ alpha    * @param temperatures Known temperatures
     val locations:RDD[Location] = points.map(x=>Location(x._1,x._2))
     val locations_x_temps:RDD[(Location, (Location, Double))] = locations.cartesian(temps)
     val locations_x_distance_and_temp:RDD[(Location, (Double, Double))] = locations_x_temps.map(x=>(x._1,distanceAndTemp(x._1, x._2)))
-    val locations_x_w_top_bottom:RDD[(Location, (Double, Double))] = locations_x_distance_and_temp.map(x=>(x._1,(weightedTemp(x._2._1,x._2._1),weight(x._2._1))))
+    val locations_x_w_top_bottom:RDD[(Location, (Double, Double))] = locations_x_distance_and_temp.map(x=>(x._1,(weightedTemp(x._2._2,x._2._1),weight(x._2._1))))
     val locations_w_top_bottom:RDD[(Location, (Double, Double))] = locations_x_w_top_bottom.reduceByKey((a,b)=>(a._1+b._1, a._2+b._2))
-    val locations_w_temp:RDD[(Location, Double)] = locations_w_top_bottom.map(x=>(x._1,x._2._1/x._2._2))
+    val sorted_locations_w_top_bottom = locations_w_top_bottom.sortBy(x=>(x._1.lat * -1000) + x._1.lon)
+
+    val locations_w_temp:RDD[(Location, Double)] = sorted_locations_w_top_bottom.map(x=>(x._1,x._2._1/x._2._2))
     val allColors:RDD[(Location, Color)] = locations_w_temp.map(x=>(x._1,interpolateColor(colors, x._2)))
     val locationPixel:RDD[(Location, Pixel)] = allColors.map(x=>(x._1,Pixel(scrimage.Color(x._2.red,x._2.green,x._2.blue))))
     val pixels:RDD[Pixel] = locationPixel.map(x=>x._2)
     val img_pixels:Array[Pixel] = pixels.collect()
+
+
+    preview("points",points)
+    preview("locations",locations)
+    preview("locations_x_temps",locations_x_temps)
+    preview("locations_x_distance_and_temp",locations_x_distance_and_temp)
+    preview("locations_x_w_top_bottom",locations_x_w_top_bottom)
+    preview("locations_w_top_bottom",locations_w_top_bottom)
+    preview("locations_w_top_bottom.filter(x=>x._1==(-90,-180))",locations_w_top_bottom.filter(x=>x._1==Location(-90,-180)))
+    preview("locations_w_temp",locations_w_temp)
+    preview("locations_w_temp.filter(x=>x._1==(-90,-180))",locations_w_temp.filter(x=>x._1==Location(-90,-180)))
+    preview("allColors",allColors)
+    preview("locationPixel",locationPixel)
+    preview("pixels",pixels)
+
     Image(361,181,img_pixels)
   }
 }

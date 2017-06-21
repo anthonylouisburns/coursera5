@@ -2,6 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage
 import com.sksamuel.scrimage.{Image, Pixel}
+import observatory.Visualization.weight
 import observatory.{Color, Location}
 
 object VisualizationOld {
@@ -21,8 +22,10 @@ object VisualizationOld {
   }
 
   def distWeighted(distTemps: Iterable[(Double, Double)]):Double={
-    distTemps.map(e=>e._2*weight(e._1)).sum / distTemps.map(e=>weight(e._1)).sum
+    distTemps.map(e=>weightedTemp(e._2,e._1)).sum / distTemps.map(e=>weight(e._1)).sum
   }
+
+
 
   def distWeighted(top:Double, bottom:Double, distTemps: List[(Double, Double)]):Double=distTemps match {
     case Nil => top / bottom
@@ -36,8 +39,15 @@ object VisualizationOld {
     }
   }
 
+  def weightedTemp(temp:Double, dist:Double):Double={
+    val d = temp * weight(dist)
+    println("wt:" + d)
+    d
+  }
   def weight(dist:Double):Double={
-    1/(Math.pow(dist,p))
+    val d = 1/(Math.pow(dist,p))
+    println("w:" + d)
+    d
   }
 
   def distance(one: Location, two: Location):Double={
@@ -113,6 +123,7 @@ object VisualizationOld {
     val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
     val allColors = allTemps.map(x=>interpolateColor(colors, x))
     val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
+    println(allTemps(0))
     Image(361,181,allPixels.toArray)
   }
 }
