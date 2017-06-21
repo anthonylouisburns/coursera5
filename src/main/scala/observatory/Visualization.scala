@@ -96,13 +96,13 @@ object Visualization {
   def interpolateColor(points: Iterable[(Double, Color)], value: Double): Color = {
     val ba = before_after(points, value)
     if(ba._2._1 - ba._1._1 == 0) return ba._1._2
-    val bweight = (value - ba._1._1)/(ba._2._1 - ba._1._1)
-    val aweight = 1-bweight
+    val aweight = (value - ba._1._1)/(ba._2._1 - ba._1._1)
+    val bweight = 1-aweight
     val bcolor = ba._1._2
     val acolor = ba._2._2
-    Color(((bcolor.red*bweight)+(acolor.red*aweight)).toInt,
-      ((bcolor.green*bweight)+(acolor.green*aweight)).toInt,
-      ((bcolor.blue*bweight)+(acolor.blue*aweight)).toInt)
+    Color(Math.round((bcolor.red*bweight)+(acolor.red*aweight)).toInt,
+      Math.round((bcolor.green*bweight)+(acolor.green*aweight)).toInt,
+      Math.round((bcolor.blue*bweight)+(acolor.blue*aweight)).toInt)
   }
 
 
@@ -141,43 +141,25 @@ alpha    * @param temperatures Known temperatures
     * @param colors Color scale
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
-  //use RDD
-//  def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
-//    val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
-//
-//    val p = Pixel(0,0,0,0)
-//    val points = for (
-//      x <- -90 to 90;
-//      y <- -180 to 180
-//    ) yield (x, y)
-//    val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
-//    val allColors = allTemps.map(x=>interpolateColor(colors, x))
-//    val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
-//    Image(361,181,allPixels.toArray)
-//  }
-
   def visualize_old(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
-    val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList).cache()
+    val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
 
-    val points:RDD[(Int,Int)] = sc.parallelize(for (
+    val p = Pixel(0,0,0,0)
+    val points = for (
       x <- -90 to 90;
       y <- -180 to 180
-    ) yield (x, y)).cache()
-
-    val p = points.collect()
-    val allTemps:RDD[Double] = points.map(x=>predictTemperature(temps, Location(x._1,x._2)))
-    val t = allTemps.collect()
-    val allColors:RDD[Color] = allTemps.map(x=>interpolateColor(colors, x))
-    val c = allColors.collect()
-    val allPixels:RDD[Pixel] = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
-    Image(361,181,allPixels.collect())
+    ) yield (x, y)
+    val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
+    val allColors = allTemps.map(x=>interpolateColor(colors, x))
+    val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
+    Image(361,181,allPixels.toArray)
   }
 
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image =  {
     val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
 
-    val xaxis = sc.parallelize(Range(-90,90))
-    val yaxis = sc.parallelize(Range(-180,180))
+    val xaxis = sc.parallelize(Range(-90,91))
+    val yaxis = sc.parallelize(Range(-180,181))
     val points:RDD[(Int,Int)] = xaxis.cartesian(yaxis)
     val locations:RDD[Location] = points.map(x=>Location(x._1,x._2))
     val locations_x_temps:RDD[(Location, (Location, Double))] = locations.cartesian(temps)
@@ -188,7 +170,7 @@ alpha    * @param temperatures Known temperatures
     val allColors:RDD[(Location, Color)] = locations_w_temp.map(x=>(x._1,interpolateColor(colors, x._2)))
     val locationPixel:RDD[(Location, Pixel)] = allColors.map(x=>(x._1,Pixel(scrimage.Color(x._2.red,x._2.green,x._2.blue))))
     val pixels:RDD[Pixel] = locationPixel.map(x=>x._2)
-    val img_pixels = pixels.collect()
+    val img_pixels:Array[Pixel] = pixels.collect()
     Image(361,181,img_pixels)
   }
 }

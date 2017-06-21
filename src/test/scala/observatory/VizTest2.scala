@@ -8,9 +8,18 @@ object VizTest2 extends App {
   override def main(args: Array[String]) = {
 //    out(viz)
 //    t3()
-    t()
+    color_check()
+//    t_old()
+    //Color(191,0,64) (scale = List((0.0,Color(255,0,0)), (1.0,Color(0,0,255))), value = 0.25)
   }
 
+  def color_check(): Unit ={
+    //Incorrect predicted color: Color(127,0,127). Expected: Color(128,0,128) (scale = List((0.0,Color(255,0,0)), (2.147483647E9,Color(0,0,255))), value = 1.0737418235E9)
+    val c = List((0.0,Color(255,0,0)), (2.147483647E9,Color(0,0,255)))
+    val x = 1.0737418235E9
+    val out = Visualization.interpolateColor(c,x)
+    println(out)//Color(191,0,64)
+  }
 
   def colors(): Iterable[(Double, Color)] = {
     val white = Color(255, 255, 255)
@@ -31,12 +40,20 @@ object VizTest2 extends App {
     out(img)
   }
 
+  def t_old(): Unit = {
+    val img = VisualizationOld.visualize(temps, colors)
+    out_old(img)
+  }
+
   def test(): Unit = {
     val img = Visualization.visualize(temps, colors)
   }
 
   def out(img:Image): Unit ={
     img.output("/Users/aburns/src/anthony/coursera/scalaSpecialization/coursera5/observatory/some-image.png")
+  }
+  def out_old(img:Image): Unit ={
+    img.output("/Users/aburns/src/anthony/coursera/scalaSpecialization/coursera5/observatory/some-image-old.png")
   }
   def t2(): Unit ={
     val n = Visualization.interpolateColor(colors, -7)
