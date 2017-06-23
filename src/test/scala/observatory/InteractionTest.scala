@@ -1,18 +1,13 @@
 package observatory
 
-import org.junit.Test
 import org.junit.runner.RunWith
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.Checkers
 
-class InteractionTest extends AssertionsForJUnit {
-  @Test
-  def t(): Unit ={
-    println("hello")
-  }
+import scala.collection.concurrent.TrieMap
 
-  @Test
-  def t2(): Unit ={
-    println("hello")
-  }
+@RunWith(classOf[JUnitRunner])
+class InteractionTest extends FunSuite with Checkers {
 
 }
