@@ -78,4 +78,10 @@ object Interaction {
     }
   }
 
+  def generateImage[Data](year:Int, zoom:Int, x:Int, y:Int, data:Data): Unit = {
+    val img:Image =  ???
+    //target/temperatures/<year>/<zoom>/<x>-<y>.png
+    img.output(s"target/temperatures/$year/$zoom/$x-$y.png")
+  }
+
 }
