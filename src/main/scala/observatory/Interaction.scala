@@ -41,30 +41,19 @@ object Interaction {
     * @return A 256×256 image showing the contents of the tile defined by `x`, `y` and `zooms`
     */
   def tile(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)], zoom: Int, x_lon: Int, y_lat: Int): Image = {
-    val minInclusive: Location = tileLocation(zoom, x_lon, y_lat)
-    val maxExclusive: Location = bottomRightLocation(zoom, x_lon, y_lat)
-
-    ???
+    val points:IndexedSeq[(Int,Int)] = for (
+      x <- 0 to 255;
+      y <- 0 to 255
+    ) yield (x, y)
+    val locations:IndexedSeq[(Int,Int)] = points.map(p=>p)
+    Visualization.pointsToImage(256,256,locations,temperatures,colors)
   }
 
-  def bottomRightLocation(zoom: Int, x_lon_top: Int, y_lat_left: Int): Location = {
-    val n = maxTileDim(zoom)
-    val x_lon = x_lon_top + 1
-    val y_lat = y_lat_left + 1
-    if (x_lon >= n && y_lat >= n) {
-      Location(lon = maxLon, lat = maxLat)
-    } else {
-
-      val maxPos: Location = tileLocation(zoom, Math.min(n, x_lon), Math.min(n, y_lat))
-      if (x_lon <= n && y_lat <= n) {
-        maxPos
-      } else {
-        val newLon = if (x_lon >= n) this.maxLon else maxPos.lon
-        val newLat = if (x_lon >= n) this.maxLat else maxPos.lat
-        Location(lon = newLon, lat = newLat)
-      }
-    }
+  def pixelLocation(zoom: Int, x_parent: Int, y_parent: Int, x: Int, y: Int): Location = {
+    val multiplier = Math.pow(2, 8).toInt
+    tileLocation(zoom + 8, multiplier * x_parent + x, multiplier * y_parent + y)
   }
+
 
   /**
     * Generates all the tiles for zoom levels 0 to 3 (included), for all the given years.

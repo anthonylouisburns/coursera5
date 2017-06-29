@@ -145,14 +145,18 @@ alpha    * @param temperatures Known temperatures
     val temps:RDD[(Location, Double)] = sc.parallelize(temperatures.toList)
 
     val p = Pixel(0,0,0,0)
-    val points = for (
+    val points:IndexedSeq[(Int,Int)] = for (
       x <- -90 to 90;
       y <- -180 to 180
     ) yield (x, y)
+    pointsToImage(361,181,points, temperatures, colors)
+  }
+
+  def pointsToImage(w: Int, h: Int, points:IndexedSeq[(Int,Int)], temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
     val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
     val allColors = allTemps.map(x=>interpolateColor(colors, x))
     val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
-    Image(361,181,allPixels.toArray)
+    Image(w,h,allPixels.toArray)
   }
 
   def preview[T](s:String, v:RDD[T]): Unit ={

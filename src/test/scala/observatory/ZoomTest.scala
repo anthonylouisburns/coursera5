@@ -45,4 +45,15 @@ class ZoomTest extends AssertionsForJUnit {
     println(br)
     assert(br.equals(Location(Interaction.maxLat, Interaction.maxLon)))
   }
+
+  @Test
+  def pixelLocation():Unit = {
+    val br:Location = Interaction.tileLocation(1,1,1)
+    val br2:Location = Interaction.tileLocation(9,256,256)
+    val pix:Location = Interaction.pixelLocation(1,0,0,256,256)
+    println(br)
+    println(br2)
+    println(pix)
+    assert(br.equals(pix))
+  }
 }
