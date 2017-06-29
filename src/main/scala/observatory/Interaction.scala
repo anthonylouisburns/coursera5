@@ -79,7 +79,9 @@ object Interaction {
   }
 
   def generateImage[Data](year:Int, zoom:Int, x:Int, y:Int, data:Data): Unit = {
-    val img:Image =  ???
+    val temps = ???
+    val colors = ???
+    val img:Image =  tile(temps, colors, zoom, x, y)
     //target/temperatures/<year>/<zoom>/<x>-<y>.png
     img.output(s"target/temperatures/$year/$zoom/$x-$y.png")
   }
