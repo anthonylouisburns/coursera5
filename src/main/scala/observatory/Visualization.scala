@@ -2,6 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage
 import com.sksamuel.scrimage.{Image, Pixel}
+import observatory.Interaction.pixelLocation
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.log4j.{Level, Logger}
@@ -149,11 +150,12 @@ alpha    * @param temperatures Known temperatures
       x <- -90 to 90;
       y <- -180 to 180
     ) yield (x, y)
-    pointsToImage(361,181,points, temperatures, colors)
+    val locations:IndexedSeq[Location] = points.map(p=>Location(p._1,p._2))
+    pointsToImage(361,181,locations, temperatures, colors)
   }
 
-  def pointsToImage(w: Int, h: Int, points:IndexedSeq[(Int,Int)], temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
-    val allTemps = points.map(x=>predictTemperature(temperatures, Location(x._1,x._2)))
+  def pointsToImage(w: Int, h: Int, locations:IndexedSeq[Location], temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
+    val allTemps = locations.map(x=>predictTemperature(temperatures, x))
     val allColors = allTemps.map(x=>interpolateColor(colors, x))
     val allPixels = allColors.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
     Image(w,h,allPixels.toArray)

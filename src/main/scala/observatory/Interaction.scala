@@ -45,7 +45,7 @@ object Interaction {
       x <- 0 to 255;
       y <- 0 to 255
     ) yield (x, y)
-    val locations:IndexedSeq[(Int,Int)] = points.map(p=>p)
+    val locations:IndexedSeq[Location] = points.map(p=>pixelLocation(zoom, x_lon, y_lat, p._1, p._2))
     Visualization.pointsToImage(256,256,locations,temperatures,colors)
   }
 
@@ -67,7 +67,15 @@ object Interaction {
                            yearlyData: Iterable[(Int, Data)],
                            generateImage: (Int, Int, Int, Int, Data) => Unit
                          ): Unit = {
-    ???
+    val zoomLevels:List[Int] = List(0,1,2,3)
+    for(
+      zoom <- zoomLevels;
+      year_data <- yearlyData;
+      x <- 0 to (maxTileDim(zoom) - 1);
+      y <- 0 to (maxTileDim(zoom) - 1);
+    ){
+      generateImage(year_data._1, zoom, x, y, year_data._2)
+    }
   }
 
 }
