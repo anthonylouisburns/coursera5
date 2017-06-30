@@ -72,7 +72,7 @@ object Interaction {
       zoom <- zoomLevels;
       year_data <- yearlyData;
       x <- 0 to (maxTileDim(zoom) - 1);
-      y <- 0 to (maxTileDim(zoom) - 1);
+      y <- 0 to (maxTileDim(zoom) - 1)
     ){
       generateImage(year_data._1, zoom, x, y, year_data._2)
     }

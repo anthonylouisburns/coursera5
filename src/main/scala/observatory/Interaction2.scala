@@ -43,7 +43,7 @@ object Interaction2 {
 
   /**
     * @param selectedLayer The selected layer
-    * @param selectedYear The selected year
+    * submit burnstony@param selectedYear The selected year
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Int]): Signal[String] = {
