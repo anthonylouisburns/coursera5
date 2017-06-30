@@ -1,6 +1,8 @@
 package observatory
 
+import com.sksamuel.scrimage
 import com.sksamuel.scrimage.{Image, Pixel}
+import observatory.Interaction.pixelLocation
 
 /**
   * 5th milestone: value-added information visualization
@@ -25,7 +27,7 @@ object Visualization2 {
     d10: Double,
     d11: Double
   ): Double = {
-    ???
+    d00*(1-x)*(1-y) + d10*x*(1-y) + d01*(1-x)*y + d11*x*y
   }
 
   /**
@@ -43,7 +45,17 @@ object Visualization2 {
     x: Int,
     y: Int
   ): Image = {
-    ???
+    val color = (v:Double)=>{Visualization.interpolateColor(colors, value=v)}
+
+    val points:IndexedSeq[(Int,Int)] = for (
+      x <- 0 to 255;
+      y <- 0 to 255
+    ) yield (x, y)
+    val temps = points.map(p=>bilinearInterpolation(p._1/256, p._2/256,grid(x,y),grid(x,y+1),grid(x+1,y),grid(x+1,y+1)))
+    val cs = temps.map(t=>color(t))
+
+    val allPixels = cs.map(x=>Pixel(scrimage.Color(x.red,x.green,x.blue)))
+    Image(256,256,allPixels.toArray)
   }
 
 }
